@@ -96,9 +96,9 @@ public class DB {
         }
         System.out.print("Таблица goods: ");
         if (!isTableExists("goods")) {
-            PreparedStatement preparedStatement = null;
+            PreparedStatement preparedStatement;
             try {
-                preparedStatement = connection.prepareStatement("CREATE TABLE goods(id NUMERIC(20) NOT NULL PRIMARY KEY, cat_id NUMERIC(20), name VARCHAR(64), price INT DEFAULT 0 NOT NULL, count INT DEFAULT 0 NOT NULL, FOREIGN KEY (cat_id) REFERENCES categories(id)))");
+                preparedStatement = connection.prepareStatement("CREATE TABLE goods(id NUMERIC(20) NOT NULL PRIMARY KEY, cat_id NUMERIC(20), name VARCHAR(64), price INT DEFAULT 0 NOT NULL, count INT DEFAULT 0 NOT NULL, FOREIGN KEY (cat_id) REFERENCES categories(id))");
                 preparedStatement.executeQuery();
                 System.out.println("Восстановлена");
             } catch (SQLException e) {
@@ -111,7 +111,7 @@ public class DB {
         }
         System.out.print("Таблица links: ");
         if (!isTableExists("links")) {
-            PreparedStatement preparedStatement = null;
+            PreparedStatement preparedStatement;
             try {
                 preparedStatement = connection.prepareStatement("CREATE TABLE links(shop_id NUMERIC(20) NOT NULL, cat_id NUMERIC(20) NOT NULL, FOREIGN KEY (shop_id) REFERENCES shops(id), FOREIGN KEY (cat_id) REFERENCES categories(id))");
                 preparedStatement.executeQuery();
@@ -159,6 +159,15 @@ public class DB {
         return false;
     }
 
+    public boolean isBatchExecutionSupported(){
+        try {
+            return connection.getMetaData().supportsBatchUpdates();
+        }catch(Exception e){
+            System.out.println("Во время проверки поддержки пакетного исполнения произошла ошибка");
+            return false;
+        }
+    }
+
     public void commit(){
         try {
             connection.commit();
@@ -195,5 +204,19 @@ public class DB {
             e.printStackTrace();
         }
         return -1;
+    }
+
+    public int[] executeRawBatch(String[] raws){
+        try {
+            Statement st = connection.createStatement();
+            for (String raw : raws) {
+                st.addBatch(raw);
+            }
+            return st.executeBatch();
+        }catch(SQLException e){
+            System.out.println("Ошибка - код: " + e.getErrorCode() + ", причина: " + e.getLocalizedMessage());
+            e.printStackTrace();
+            return null;
+        }
     }
 }
