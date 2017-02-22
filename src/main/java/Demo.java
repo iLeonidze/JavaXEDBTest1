@@ -41,6 +41,7 @@ public class Demo {
                 //System.out.println(sbqs[0]);
                 float timeDiff = new Date().getTime() / 1000 - timeStart.getTime() / 1000;
                 float speed = i / (timeDiff > 0 ? timeDiff : 1);
+                middleSpeed = speed;
                 System.out.println("Создано записей: " + (i + recordsPerUpdateAmount) + ", скорость " + Math.floor(speed) + " записей в секунду, осталось ~" + (Math.floor(((fakeRecordsAmountRequired - i) / speed) / 60 * 100) / 100) + " минут");
             } else {
                 sqlRequest = "INSERT ALL\n" + getSubQuery(i, generationMode) + "SELECT 1 FROM DUAL";

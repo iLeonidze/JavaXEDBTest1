@@ -212,7 +212,9 @@ public class DB {
             for (String raw : raws) {
                 st.addBatch(raw);
             }
-            return st.executeBatch();
+            int[] result = st.executeBatch();
+            st.close();
+            return result;
         }catch(SQLException e){
             System.out.println("Ошибка - код: " + e.getErrorCode() + ", причина: " + e.getLocalizedMessage());
             e.printStackTrace();

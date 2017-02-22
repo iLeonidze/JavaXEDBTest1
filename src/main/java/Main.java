@@ -4,7 +4,7 @@
  */
 public class Main {
     public static final int fakeRecordsAmount = 250000;
-    public static final boolean batchExecutionAllowed = false;
+    public static final boolean batchExecutionAllowed = true;
     public static void main(String[] args){
         System.out.println("20.02.2017");
         DB db = new DB();
