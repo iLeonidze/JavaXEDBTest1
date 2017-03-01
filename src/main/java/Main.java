@@ -4,9 +4,9 @@
  */
 public class Main {
     public static final int fakeRecordsAmount = 250000;
-    public static final boolean batchExecutionAllowed = true;
+    public static final boolean batchExecutionAllowed = false;
     public static void main(String[] args){
-        System.out.println("20.02.2017");
+        System.out.println("20.02.2017-01.02.2017");
         DB db = new DB();
         if(!db.init()) return;
         System.out.println("Размер shops: "+db.countTableRaws("shops"));
@@ -14,7 +14,7 @@ public class Main {
         System.out.println("Размер goods: "+db.countTableRaws("goods"));
         System.out.println("Размер links: "+db.countTableRaws("links"));
 
-        db.dropAllTables();
+        //db.dropAllTables();
         //System.exit(0);
         if(!db.isDBReady()) return;
 
@@ -24,5 +24,7 @@ public class Main {
         if(db.countTableRaws("categories")<fakeRecordsAmount) demo.insertFakeData("categories");
         if(db.countTableRaws("goods")<fakeRecordsAmount) demo.insertFakeData("goods");
         if(db.countTableRaws("links")<fakeRecordsAmount) demo.insertFakeData("links");
+
+        db.printHierarchy(50);
     }
 }

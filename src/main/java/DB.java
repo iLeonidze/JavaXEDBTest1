@@ -221,4 +221,28 @@ public class DB {
             return null;
         }
     }
+
+    public void proceedHierarchy(boolean print, int limit){
+        try {
+            Statement st = connection.createStatement();
+            ResultSet rs = st.executeQuery("SELECT lpad(' ', level)||name as Tree FROM categories WHERE ROWNUM < "+limit+" START WITH parent_cat_id is null CONNECT BY PRIOR id = parent_cat_id ORDER SIBLINGS BY name");
+            ResultSetMetaData rsmd = rs.getMetaData();
+            int columnsNumber = rsmd.getColumnCount();
+            while (rs.next()) {
+                for (int i = 1; i <= columnsNumber; i++) {
+                    if (i > 1) System.out.print(",  ");
+                    String columnValue = rs.getString(i);
+                    if(print) System.out.print(columnValue);
+                }
+                if(print) System.out.println("");
+            }
+            rs.close();
+            st.close();
+            //return result;
+        }catch(SQLException e) {
+            System.out.println("Ошибка - код: " + e.getErrorCode() + ", причина: " + e.getLocalizedMessage());
+            e.printStackTrace();
+            //return null;
+        }
+    }
 }
