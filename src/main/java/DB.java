@@ -245,4 +245,8 @@ public class DB {
             //return null;
         }
     }
+
+    public void updateGoodName(int id, String name){
+        String query = "CREATE PROCEDURE updateGoodName(goodID number, goodName varchar(16)) AS BEGIN UPDATE goods SET name=goodName WHERE id=goodID; END;";
+    }
 }

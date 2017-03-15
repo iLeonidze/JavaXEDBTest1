@@ -10,13 +10,15 @@ public class Demo {
     private int recordsPerUpdateAmount = 1000;
     private DB db;
     private boolean batchExecutionAllowed = false;
+    private boolean hintSpeedUpAllowed = false;
 
-    public Demo(final DB db, boolean useBatchExecution) {
+    public Demo(final DB db, boolean useBatchExecution, boolean useHintSpeedUp) {
         System.out.println("Всего необходимо демо-записей: " + fakeRecordsAmountRequired);
         System.out.println("Разрешено генерировать записей на одну запрос: " + recordsPerUpdateAmount);
         System.out.println("Использовать пакетную выгрузку в БД: " + (useBatchExecution ? "ДА" : "НЕТ"));
         this.db = db;
         this.batchExecutionAllowed = useBatchExecution;
+        this.hintSpeedUpAllowed = useHintSpeedUp;
     }
 
     public int getFakeRecordsAmountRequired() {
@@ -44,7 +46,7 @@ public class Demo {
                 middleSpeed = speed;
                 System.out.println("Создано записей: " + (i + recordsPerUpdateAmount) + ", скорость " + Math.floor(speed) + " записей в секунду, осталось ~" + (Math.floor(((fakeRecordsAmountRequired - i) / speed) / 60 * 100) / 100) + " минут");
             } else {
-                sqlRequest = "INSERT ALL\n" + getSubQuery(i, generationMode) + "SELECT 1 FROM DUAL";
+                sqlRequest = "INSERT ALL"+(hintSpeedUpAllowed ? " /*+ APPEND PARALLEL(8) INDEX(id) FULL("+generationMode+") */" : "" )+"\n" + getSubQuery(i, generationMode) + "SELECT 1 FROM DUAL";
                 db.insert(sqlRequest);
                 //System.out.println(sqlRequest);
                 float timeDiff = new Date().getTime() / 1000 - timeStart.getTime() / 1000;
@@ -82,19 +84,20 @@ public class Demo {
 
     private String[] getRawsQuery(int i, String generationMode) {
         String[] subQuery = new String[recordsPerUpdateAmount];
+        String hint = hintSpeedUpAllowed ? "/*+ APPEND PARALLEL(4) INDEX(id) FULL("+generationMode+") */ " : "";
         for (int i2 = i; i2 < i + recordsPerUpdateAmount; i2++) {
             switch (generationMode) {
                 case "shops":
-                    subQuery[i2-i] = "INSERT "+generateShopsRow(i2);
+                    subQuery[i2-i] = "INSERT "+hint+generateShopsRow(i2);
                     break;
                 case "categories":
-                    subQuery[i2-i] = "INSERT "+generateCategoriesRow(i2);
+                    subQuery[i2-i] = "INSERT "+hint+generateCategoriesRow(i2);
                     break;
                 case "links":
-                    subQuery[i2-i] = "INSERT "+generateLinksRow(i2);
+                    subQuery[i2-i] = "INSERT "+hint+generateLinksRow(i2);
                     break;
                 case "goods":
-                    subQuery[i2-i] = "INSERT "+generateGoodsRow(i2);
+                    subQuery[i2-i] = "INSERT "+hint+generateGoodsRow(i2);
                     break;
             }
         }
